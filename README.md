@@ -9,4 +9,6 @@ Steps to follow:
 5. Run `ml_classification_bin.py` for binary dimension classification
 6. Run `ml_classification_all.py` for all dimension classification
 
+Allennlp elmo configs are in: doc/
+
 The other experiments can be seen in the notebooks/
