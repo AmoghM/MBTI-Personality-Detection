@@ -1,9 +1,10 @@
 from cleantext import clean
 import pandas as pd
-import spacy,re
+import spacy,re,json
 from random import shuffle
 nlp = spacy.load('en_core_web_sm')
 nlp.max_length = 6500000
+import argparse
 
 label_encoding = { "istj":1, "istp":2, "isfj":3, "isfp":4, "infj":5, "infp":6, "intj":7, "intp":8, "estp":9, "estj":10, "esfp":11, "esfj":12, "enfp":13, "enfj":14, "entp":15, "entj":16 }
 class DataProcess:
@@ -151,7 +152,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     dc = DataProcess(args.read,chunksize=1000)
     dc.fit()
-    dc.export_data_csv(dc.data)
+    dc.export_data_csv(dc.data,write_path=args.clean_write,col=["comment","type"])
 
     df = pd.read_csv(args.clean_write,chunksize=1000)
     data = DataProcess.fit_clean(df)

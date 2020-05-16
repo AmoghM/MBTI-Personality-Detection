@@ -19,6 +19,27 @@ W2V_PATH = "./fastText/crawl-300d-2M.vec"
 model.set_w2v_path(W2V_PATH)
 model.build_vocab_k_words(K=100000)
 
+
+def infersent_embed_doc(rpath, wpath):
+    df = pd.read_csv(rpath,chunksize=1000)
+    text = []
+    count=0
+    for chunk in df:
+        text = text + chunk['comment'].tolist()
+    error_idx = []
+    with open(wpath,'w+') as fw:
+        for i in range(0,len(text)):
+            try:
+                embeddings = model.encode([text[i]], bsize=64, tokenize=False, verbose=True).tolist()[0]
+                torch.cuda.empty_cache()
+            except RuntimeError:
+                error_idx.append(i)
+            
+            fw.write(str(embeddings)+"\n")
+            if i%10==0:
+                print(i)
+            count+=1
+
 def read_data(path):
     df = pd.read_csv(path,header=None)    
     return df[0].tolist(),df[1].tolist()
@@ -41,10 +62,13 @@ def inferesent_embedding(path,text,label,batch=64):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--read", default="../data/mbti_comments/extra_clean_seq_60.csv")
+    parser.add_argument("--rdoc", default="/home/amoghmishra23/appledore/MBTI-Personality-Detection/data/mbti_comments/mbti_comments_cleaned.csv")
+    parser.add_argument("--wdoc",default="output/embedding_infersent.txt")
+    parser.add_argument("--read", default="/home/amoghmishra23/appledore/MBTI-Personality-Detection//data/mbti_comments/extra_clean_seq_60.csv")
     parser.add_argument("--write",default="../output/embedding_extra_clean_seq_60.json")
 
     args = parser.parse_args()
+    infersent_embed_doc(args.rdoc,args.wdoc)
     text, label = read_data(args.read)
     inferesent_embedding(args.write, text, label, 512)
     
